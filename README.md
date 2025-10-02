@@ -54,4 +54,7 @@ The system follows a decoupled, event-driven architecture. Data flows from the p
 * **./test.sh:** Runs a quick smoke test against the API.
 
 <img width="1907" height="855" alt="Screenshot 2025-09-28 173447" src="https://github.com/user-attachments/assets/99d52444-d169-4d9f-837e-c3a1f8cf35d6" />
+<img width="1919" height="969" alt="Screenshot 2025-09-28 165518" src="https://github.com/user-attachments/assets/e8ca308f-c80d-43aa-b1bc-18ec710b38a1" />
+<img width="1882" height="901" alt="Screenshot 2025-09-26 171000" src="https://github.com/user-attachments/assets/0de89aa0-9978-45db-ba71-764b235caf6f" />
+<img width="1917" height="1020" alt="Screenshot 2025-09-26 152953" src="https://github.com/user-attachments/assets/0370834e-29c5-4408-a00c-63d059ee6030" />
 
