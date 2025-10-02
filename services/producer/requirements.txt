@@ -1,0 +1,6 @@
+kafka-python==2.0.2
+pydantic==2.6.0
+python-dotenv==1.0.0
+requests==2.31.0
+sseclient-py==1.7.2
+pydantic-settings

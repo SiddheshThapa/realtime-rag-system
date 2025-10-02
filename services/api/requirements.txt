@@ -1,0 +1,33 @@
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+redis==5.2.0
+pydantic>=2.7.0,<3.0
+
+# embedding + HF stack
+sentence-transformers==2.6.1
+transformers==4.36.2
+huggingface-hub>=0.19.3,<1.0
+
+# numeric stack (pinned to work with numpy 1.26.x)
+numpy==1.26.4
+scipy==1.11.4
+scikit-learn==1.3.2
+
+# torch pins — match the CPU wheel you install in the Dockerfile
+torch==2.2.2
+torchvision==0.17.2
+
+# misc
+tqdm
+nltk
+sentencepiece
+prometheus-client==0.12.0
+starlette-prometheus==0.9.0
+pyjwt==2.8.0
+requests==2.31.0
+python-dotenv==1.0.0
+
+# tracing
+opentelemetry-sdk==1.22.0
+opentelemetry-exporter-jaeger==1.21.0
+pydantic-settings==2.11.0

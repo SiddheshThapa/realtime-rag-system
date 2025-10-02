@@ -1,0 +1,200 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    networks:
+      - rag-network
+
+  kafka:
+    image: bitnami/kafka:3.6
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ragpwd}
+      POSTGRES_DB: ${POSTGRES_DB:-ragdb}
+      POSTGRES_USER: ${POSTGRES_USER:-rag}
+    volumes:
+      - ./infra/postgres-init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rag} -d ${POSTGRES_DB:-ragdb}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.47
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - rag-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - rag-network
+
+  grafana:
+    image: grafana/grafana:9.5.10
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    networks:
+      - rag-network
+
+  # Preload models into ./data/models so containers don't download large weights at startup
+  models-preload:
+    build:
+      context: .
+      dockerfile: services/python-base/Dockerfile
+    image: multi-stage-rag-models-preload
+    user: root
+    environment:
+      - HOME=/tmp
+    volumes:
+      - ./data/models:/data/models
+      - ./infra:/src/infra
+    command: [ "bash","-lc","pip install --no-cache-dir huggingface-hub && python /src/infra/download_models.py" ]
+    restart: "no"
+    networks:
+      - rag-network
+
+  producer:
+    build:
+      context: .
+      dockerfile: services/producer/Dockerfile
+    env_file: .env
+    environment:
+      USER_AGENT: "realtime-rag/0.1 (+mailto:siddhesh.t123@gmail.com)"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  producer_sample:
+    build:
+      context: .
+      dockerfile: services/producer/Dockerfile
+    command: ["python", "services/producer/sample_producer.py"]
+    env_file: .env
+    depends_on:
+      - kafka
+    networks:
+      - rag-network
+
+  processor:
+    build:
+      context: .
+      dockerfile: services/processor/Dockerfile
+    env_file: .env
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      models-preload:
+        condition: service_completed_successfully
+    volumes:
+      - faiss_data:/data/faiss
+      - ./data/models:/data/models
+    environment:
+      TRANSFORMERS_CACHE: /data/models
+      HF_HOME: /data/models
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+    ports:
+      - "9101:9101"
+      - "9201:9201"
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama   # persist models
+    networks:
+      - rag-network
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      processor:
+        condition: service_started
+      models-preload:
+        condition: service_completed_successfully
+      ollama:
+        condition: service_started
+    volumes:
+      - faiss_data:/data/faiss
+      - ./data/models:/data/models
+    environment:
+      TRANSFORMERS_CACHE: /data/models
+      HF_HOME: /data/models
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+volumes:
+  postgres_data:
+  faiss_data:
+  ollama_data:     # <-- added
+
+networks:
+  rag-network:
+    driver: bridge
