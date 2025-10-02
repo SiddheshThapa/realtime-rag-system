@@ -22,22 +22,17 @@ A complete, end-to-end system that ingests a real-time data stream, processes it
 The system follows a decoupled, event-driven architecture. Data flows from the producer, through the Kafka message bus, to the processor for storage, and is finally queried by the API.
 
 
-```mermaid
-graph TD
-    A[Wikimedia SSE Stream] --> B(Producer Service);
-    B --> C{Kafka Topic: wikipedia.edits};
-    C --> D(Processor Service);
-    D -- Stores Vector --> E[Vector DB <br>(Redis / FAISS)];
-    F(User) --> G(API Service);
-    G -- Queries Vector --> E;
-    G -- Sends Prompt to --> H(LLM <br>(Ollama));
-    H --> G;
-    G --> F;
+**Data Ingestion Flow:**
+`Wikimedia Stream` → `Producer Service` → `Kafka Topic` → `Processor Service(involves text embedder for vector chunks)` → `Vector DB store adapter (Redis/FAISS)`
 
+**User Query Flow:**
+`User` → `API Service` → `Vector DB (for context)` → `LLM adapter (Ollama/Hugging Face model google/flan-t5-small)` → `API Service` → `User`
+
+---
     
 
 
-## Tech Stack
+###  System Architecture
 Backend: Python, FastAPI
 Data Streaming: Kafka
 Database: Redis (Vector Store), PostgreSQL (Metadata - future use)
@@ -46,7 +41,7 @@ Observability: Prometheus, Grafana, Jaeger (OpenTelemetry)
 Containerization: Docker, Docker Compose
 
 
-## External endpoints 
+### ** Explore the Services**
 **On Windows:** You will need to use a Bash-compliant terminal like **Git Bash** (which comes with Git) or **WSL** to run the helper scripts (`.sh` files)
 
 API Documentation (Swagger UI): http://localhost:8000/docs
