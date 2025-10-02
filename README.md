@@ -53,3 +53,5 @@ The system follows a decoupled, event-driven architecture. Data flows from the p
 * **./logs.sh <service_name>:** Follows the logs for a specific service (e.g., ./logs.sh api).
 * **./test.sh:** Runs a quick smoke test against the API.
 
+<img width="1907" height="855" alt="Screenshot 2025-09-28 173447" src="https://github.com/user-attachments/assets/99d52444-d169-4d9f-837e-c3a1f8cf35d6" />
+
