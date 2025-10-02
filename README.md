@@ -33,23 +33,23 @@ The system follows a decoupled, event-driven architecture. Data flows from the p
 
 
 ###  System Architecture
-Backend: Python, FastAPI
-Data Streaming: Kafka
-Database: Redis (Vector Store), PostgreSQL (Metadata - future use)
-AI/ML: Sentence-Transformers, PyTorch, Ollama
-Observability: Prometheus, Grafana, Jaeger (OpenTelemetry)
-Containerization: Docker, Docker Compose
+* **Backend:** Python, FastAPI
+* **Data Streaming:** Kafka
+* **Database:** Redis (Vector Store), PostgreSQL (Metadata - future use)
+* **AI/ML:** Sentence-Transformers, PyTorch, Ollama
+* **Observability:** Prometheus, Grafana, Jaeger (OpenTelemetry)
+* **Containerization:** Docker, Docker Compose
 
 
 ### ** Explore the Services**
 **On Windows:** You will need to use a Bash-compliant terminal like **Git Bash** (which comes with Git) or **WSL** to run the helper scripts (`.sh` files)
 
-API Documentation (Swagger UI): http://localhost:8000/docs
-Grafana Dashboards: http://localhost:3000 (login: admin / admin)
-Prometheus Targets: http://localhost:9090/targets
-Jaeger Traces: http://localhost:16686
-./start.sh: Starts the entire application stack.
-./stop.sh: Stops all running containers.
-./logs.sh <service_name>: Follows the logs for a specific service (e.g., ./logs.sh api).
-./test.sh: Runs a quick smoke test against the API.
+* **API Documentation (Swagger UI):** http://localhost:8000/docs
+* **Grafana Dashboards:** http://localhost:3000 (login: admin / admin)
+* **Prometheus Targets:** http://localhost:9090/targets
+* **Jaeger Traces:** http://localhost:16686
+* **./start.sh:** Starts the entire application stack.
+* **./stop.sh:** Stops all running containers.
+* **./logs.sh <service_name>:** Follows the logs for a specific service (e.g., ./logs.sh api).
+* **./test.sh:** Runs a quick smoke test against the API.
 
