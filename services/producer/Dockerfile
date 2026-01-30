@@ -1,4 +1,3 @@
-# services/producer/Dockerfile
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
@@ -8,9 +7,10 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY services/producer/producer.py ./services/producer/producer.py
+
+COPY producer.py .
 
 RUN python -m pip install --upgrade pip \
  && pip install requests sseclient-py kafka-python certifi
 
-CMD ["python","services/producer/producer.py"]
+CMD ["python","producer.py"]
