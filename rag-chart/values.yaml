@@ -1,0 +1,36 @@
+namespace: rag
+
+api:
+  image: siddheshthapa/rag-api:latest
+  replicas: 2
+  port: 8000
+
+processor:
+  image: siddheshthapa/rag-processor:latest
+  replicas: 1
+  port: 8080
+
+producer:
+  image: siddheshthapa/rag-producer:latest
+  replicas: 1
+
+kafka:
+  image: bitnami/kafka:3.6
+
+zookeeper:
+  image: bitnami/zookeeper:3.9
+
+postgres:
+  image: postgres:15
+  storage: 10Gi
+
+redis:
+  image: redis:7
+
+ollama:
+  image: ollama/ollama:latest
+  storage: 10Gi
+
+pvc:
+  models: 20Gi
+  faiss: 10Gi

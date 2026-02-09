@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: models-preload
+  namespace: rag
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: preload
+        image: siddheshthapa/models-preload:latest
+        volumeMounts:
+        - name: models
+          mountPath: /data/models
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: models-pvc
